@@ -5,8 +5,11 @@ using UnityEngine;
 public class Turret : MonoBehaviour
 {
     [SerializeField] private List<Transform> barrels;
-    [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private float reloadDelay = 1;
+
+    //[SerializeField] private GameObject bulletPrefab;
+    //[SerializeField] private float reloadDelay = 1;
+
+    public TurretData turretData;
 
     private bool canShoot = true;
     private Collider2D[] tankColliders;
@@ -23,7 +26,7 @@ public class Turret : MonoBehaviour
 
     private void Start()
     {
-        bulletPool.Initialize(bulletPrefab, booletPoolCount);
+        bulletPool.Initialize(turretData.bulletPrefab, booletPoolCount);
     }
 
     private void Update()
@@ -42,14 +45,14 @@ public class Turret : MonoBehaviour
         if (canShoot == true)
         {
             canShoot = false;
-            currentDelay = reloadDelay;
+            currentDelay = turretData.reloadDelay;
 
             foreach (Transform barrel in barrels)
             {
                 GameObject bulletInstance = bulletPool.CrateObject();
                 bulletInstance.transform.position = barrel.position;
                 bulletInstance.transform.localRotation = barrel.rotation;
-                bulletInstance.GetComponent<Bullet>().Initialize();
+                bulletInstance.GetComponent<Bullet>().Initialize(turretData.bulletData);
 
                 foreach (Collider2D tankCollider in tankColliders)
                 {

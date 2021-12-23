@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] float speed = 10;
-    [SerializeField] private int damage = 5;
-    [SerializeField] private float maxDistance = 10;
+    private BulletData bulletData;
 
     private Vector2 startPosition;
     private float conqueredDistance = 0;
@@ -16,17 +14,18 @@ public class Bullet : MonoBehaviour
         rb2D = GetComponent<Rigidbody2D>();
     }
 
-    public void Initialize()
+    public void Initialize(BulletData bulletData)
     {
+        this.bulletData = bulletData;
         startPosition = transform.position;
-        rb2D.velocity = transform.up * speed;
+        rb2D.velocity = transform.up * bulletData.speed;
     }
 
     private void Update()
     {
         conqueredDistance = Vector2.Distance(transform.position, startPosition);
 
-        if (conqueredDistance >= maxDistance)
+        if (conqueredDistance >= bulletData.maxDistance)
         {
             DisableObject();
         }
@@ -43,7 +42,7 @@ public class Bullet : MonoBehaviour
         Damagable damagable = collision.GetComponent<Damagable>();
         if (damagable != null)
         {
-            damagable.Hit(damage);
+            damagable.Hit(bulletData.damage);
         }
         DisableObject();
     }

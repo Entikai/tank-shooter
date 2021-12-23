@@ -4,13 +4,11 @@ using UnityEngine;
 
 public class TankMover : MonoBehaviour
 {
+    [SerializeField] private TankMovementData movementData;
+    
     private Vector2 movementVector;
     private Rigidbody2D rb2D;
-    [SerializeField] private float maxSpeed = 150;
-    [SerializeField] private float rotationSpeed = 150;
 
-    [SerializeField] private float acceleration = 70;
-    [SerializeField] private float deacceleration = 50;
     private float currentSpeed = 0;
     private float currentForewardDirection = 1;
 
@@ -34,18 +32,20 @@ public class TankMover : MonoBehaviour
     {
         if (Mathf.Abs(movementVector.y) > 0)
         {
-            currentSpeed += acceleration * Time.deltaTime;
+            currentSpeed += movementData.acceleration * Time.deltaTime;
         }
         else
         {
-            currentSpeed -= deacceleration * Time.deltaTime;
+            currentSpeed -= movementData.deacceleration * Time.deltaTime;
         }
-        currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+        currentSpeed = Mathf.Clamp(currentSpeed, 0, movementData.maxSpeed);
     }
 
     private void FixedUpdate()
     {
-        rb2D.velocity = (Vector2)transform.up * movementVector.y * currentSpeed * currentForewardDirection * Time.fixedDeltaTime;
-        rb2D.MoveRotation(transform.rotation * Quaternion.Euler(0, 0, -movementVector.x * rotationSpeed * Time.fixedDeltaTime));
+        rb2D.velocity = (Vector2)transform.up * movementVector.y * 
+            currentSpeed * currentForewardDirection * Time.fixedDeltaTime;
+        rb2D.MoveRotation(transform.rotation * Quaternion.Euler(
+            0, 0, -movementVector.x * movementData.rotationSpeed * Time.fixedDeltaTime));
     }
 }

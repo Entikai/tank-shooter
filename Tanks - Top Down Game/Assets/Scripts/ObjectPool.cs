@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ObjectPool : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class ObjectPool : MonoBehaviour
     protected Queue<GameObject> objectPool;
 
     private Transform spawnedObjectsParent;
+
+    [SerializeField] private UnityEvent<GameObject> OnPooledObjectInstantiated = new UnityEvent<GameObject>();
+    [SerializeField] private UnityEvent<Queue<GameObject>> OnObjectPoolUpdated = new UnityEvent<Queue<GameObject>>();
 
     private void Awake()
     {
@@ -32,9 +36,9 @@ public class ObjectPool : MonoBehaviour
             spawnedObject = Instantiate(objectToPool, transform.position, Quaternion.identity);
             spawnedObject.name = transform.root.name + "_" + objectToPool.name + "_" + objectPool.Count;
             spawnedObject.transform.SetParent(spawnedObjectsParent);
-            
-            //Refactor this next line. There should be an event fired, and another script should do this.
-            spawnedObject.AddComponent<DestroyIfDisabled>();
+
+            OnPooledObjectInstantiated?.Invoke(spawnedObject);
+            OnObjectPoolUpdated?.Invoke(objectPool);
         }
         else
         {
@@ -42,8 +46,10 @@ public class ObjectPool : MonoBehaviour
             spawnedObject.transform.position = transform.position;
             spawnedObject.transform.rotation = Quaternion.identity;
             spawnedObject.SetActive(true);
+            OnObjectPoolUpdated?.Invoke(objectPool);
         }
         objectPool.Enqueue(spawnedObject);
+        OnObjectPoolUpdated?.Invoke(objectPool);
         return spawnedObject;
     }
 
@@ -60,20 +66,6 @@ public class ObjectPool : MonoBehaviour
                 spawnedObjectsParent = parentObject.transform;
             else
                 spawnedObjectsParent = new GameObject(name).transform;
-        }
-    }
-
-    //This should be in another script that should do this when the tank is killed.
-    private void OnDestroy()
-    {
-        foreach (var item in objectPool)
-        {
-            if (item == null)
-                continue;
-            else if (item.activeSelf == false)
-                Destroy(item);
-            else
-                item.GetComponent<DestroyIfDisabled>().SelfDestructionEnabled = true;
         }
     }
 }
